@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление заказами</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            50: '#f7f7f8',
+                            100: '#e5e5e6',
+                            200: '#d4d4d6',
+                            300: '#a3a3a5',
+                            400: '#737375',
+                            500: '#525254',
+                            600: '#404042',
+                            700: '#262628',
+                            800: '#1a1a1b',
+                            900: '#121213',
+                            950: '#0a0a0b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-dark-950 text-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-2xl">
+        <div id="authScreens" class="text-center">
+            <h1 class="text-3xl font-bold mb-8 text-blue-400">Управление заказами</h1>
+            <div id="loginForm" class="bg-dark-900 rounded-xl shadow-2xl p-8 border border-dark-700 max-w-md mx-auto">
+                <h2 class="text-xl font-semibold mb-6 text-gray-100">Вход</h2>
+                <div class="mb-4">
+                    <label class="block text-gray-400 text-sm font-medium mb-2" for="loginUsername">Логин</label>
+                    <input type="text" id="loginUsername" class="w-full bg-dark-800 border border-dark-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors" placeholder="Введите логин">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-400 text-sm font-medium mb-2" for="loginPassword">Пароль</label>
+                    <input type="password" id="loginPassword" class="w-full bg-dark-800 border border-dark-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors" placeholder="Введите пароль">
+                </div>
+                <button id="loginBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200 mb-4">Войти</button>
+                <p class="text-gray-400 text-sm">Нет аккаунта? <button id="showRegisterBtn" class="text-blue-400 hover:text-blue-300 underline">Зарегистрироваться</button></p>
+                <p id="loginError" class="text-red-400 text-sm mt-4 hidden"></p>
+            </div>
+            <div id="registerForm" class="hidden bg-dark-900 rounded-xl shadow-2xl p-8 border border-dark-700 max-w-md mx-auto">
+                <h2 class="text-xl font-semibold mb-6 text-gray-100">Регистрация</h2>
+                <div class="mb-4">
+                    <label class="block text-gray-400 text-sm font-medium mb-2" for="registerUsername">Логин</label>
+                    <input type="text" id="registerUsername" class="w-full bg-dark-800 border border-dark-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors" placeholder="Придумайте логин">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-400 text-sm font-medium mb-2" for="registerPassword">Пароль</label>
+                    <input type="password" id="registerPassword" class="w-full bg-dark-800 border border-dark-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors" placeholder="Придумайте пароль">
+                </div>
+                <button id="registerBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200 mb-4">Зарегистрироваться</button>
+                <p class="text-gray-400 text-sm">Уже есть аккаунт? <button id="showLoginBtn" class="text-blue-400 hover:text-blue-300 underline">Войти</button></p>
+                <p id="registerError" class="text-red-400 text-sm mt-4 hidden"></p>
+            </div>
+        </div>
+        <div id="mainApp" class="hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl font-bold text-blue-400">Система управления заказами</h1>
+                <div class="flex items-center gap-4">
+                    <span id="userDisplay" class="text-gray-400"></span>
+                    <button id="switchAccountBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">🔄 Сменить аккаунт</button>
+                    <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">Выйти</button>
+                </div>
+            </div>
+            <div class="text-center mb-8">
+                <button id="showOrderFormBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200">✨ Создать заказ</button>
+            </div>
+            <div id="orderForm" class="hidden bg-dark-900 rounded-xl shadow-2xl p-6 mb-8 border border-dark-700">
+                <h2 class="text-xl font-semibold mb-6 text-gray-100">Новый заказ</h2>
+                <div class="mb-4">
+                    <label class="block text-gray-400 text-sm font-medium mb-2" for="orderNumber">Номер заказа</label>
+                    <input type="text" id="orderNumber" class="w-full bg-dark-800 border border-dark-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors" placeholder="Введите номер заказа">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-400 text-sm font-medium mb-2" for="expectedDate">Ожидаемая дата прихода товара</label>
+                    <input type="date" id="expectedDate" class="w-full bg-dark-800 border border-dark-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-400 text-sm font-medium mb-2" for="clientNumber">Номер клиента</label>
+                    <input type="text" id="clientNumber" class="w-full bg-dark-800 border border-dark-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors" placeholder="Введите номер клиента">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-400 text-sm font-medium mb-2">Связь с клиентом</label>
+                    <button id="contactBtn" class="w-full bg-dark-800 border-2 border-dashed border-dark-600 rounded-lg px-4 py-3 text-gray-400 hover:border-yellow-500 hover:text-yellow-500 transition-all duration-200 flex items-center justify-center gap-2">
+                        <span id="contactIcon">📞</span>
+                        <span id="contactText">Нажать, если связь была установлена</span>
+                    </button>
+                    <input type="hidden" id="contactStatus" value="false">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-400 text-sm font-medium mb-2" for="comments">Комментарии</label>
+                    <textarea id="comments" rows="3" class="w-full bg-dark-800 border border-dark-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors resize-none" placeholder="Дополнительная информация о заказе..."></textarea>
+                </div>
+                <button id="saveOrderBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200">💾 Сохранить заказ</button>
+            </div>
+            <div id="ordersList" class="space-y-4">
+                <h2 class="text-xl font-semibold text-gray-100 mb-4">Список заказов</h2>
+                <div id="ordersContainer" class="space-y-3">
+                    <p id="noOrdersMessage" class="text-gray-500 text-center py-8">Пока нет сохранённых заказов</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function() {
+            const API_BASE = '/api';
+            
+            let currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+            let currentEditingOrderId = null;
+            let ordersList = [];
+            
+            // === КЭШИРОВАНИЕ ===
+            const CACHE_KEY = 'orders_cache';
+            const CACHE_TTL = 60000;
+            let cache = { data: null, timestamp: 0 };
+            
+            function getFromCache() {
+                if (!cache.data) return null;
+                const now = Date.now();
+                if (now - cache.timestamp > CACHE_TTL) {
+                    cache.data = null;
+                    return null;
+                }
+                return cache.data;
+            }
+            
+            function setCache(data) {
+                cache.data = data;
+                cache.timestamp = Date.now();
+            }
+            
+            function invalidateCache() {
+                cache.data = null;
+                cache.timestamp = 0;
+                localStorage.removeItem(CACHE_KEY);
+            }
+            
+            function persistOrdersLocally(orders) {
+                try {
+                    localStorage.setItem(CACHE_KEY, JSON.stringify({
+                        data: orders,
+                        timestamp: Date.now()
+                    }));
+                } catch (e) {
+                    console.warn('Failed to persist orders locally:', e);
+                }
+            }
+            
+            function loadPersistedOrders() {
+                try {
+                    const stored = localStorage.getItem(CACHE_KEY);
+                    if (stored) {
+                        const parsed = JSON.parse(stored);
+                        const now = Date.now();
+                        if (now - parsed.timestamp < CACHE_TTL) {
+                            return parsed.data;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Failed to load persisted orders:', e);
+                }
+                return null;
+            }
+
+            const authScreens = document.getElementById('authScreens');
+            const mainApp = document.getElementById('mainApp');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const loginUsername = document.getElementById('loginUsername');
+            const loginPassword = document.getElementById('loginPassword');
+            const registerUsername = document.getElementById('registerUsername');
+            const registerPassword = document.getElementById('registerPassword');
+            const loginBtn = document.getElementById('loginBtn');
+            const registerBtn = document.getElementById('registerBtn');
+            const showRegisterBtn = document.getElementById('showRegisterBtn');
+            const showLoginBtn = document.getElementById('showLoginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const userDisplay = document.getElementById('userDisplay');
+            const switchAccountBtn = document.getElementById('switchAccountBtn');
+            const loginError = document.getElementById('loginError');
+            const registerError = document.getElementById('registerError');
+            const showOrderFormBtn = document.getElementById('showOrderFormBtn');
+            const orderForm = document.getElementById('orderForm');
+            const contactBtn = document.getElementById('contactBtn');
+            const contactIcon = document.getElementById('contactIcon');
+            const contactText = document.getElementById('contactText');
+            const contactStatus = document.getElementById('contactStatus');
+            const saveOrderBtn = document.getElementById('saveOrderBtn');
+            const ordersContainer = document.getElementById('ordersContainer');
+            const noOrdersMessage = document.getElementById('noOrdersMessage');
+
+            window.toggleOrderContact = async function(orderId) {
+                if (!currentUser) return;
+                const order = ordersList.find(o => o.id === orderId);
+                if (!order) return;
+                
+                const newContactStatus = !order.has_contact;
+                order.has_contact = newContactStatus;
+                renderOrders(ordersList);
+                
+                try {
+                    const response = await fetch(`${API_BASE}/orders/${orderId}/contact`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ hasContact: newContactStatus })
+                    });
+                    
+                    if (!response.ok) throw new Error('Ошибка обновления статуса');
+                    
+                    invalidateCache();
+                    persistOrdersLocally(ordersList);
+                } catch (err) {
+                    console.error('Error toggling contact:', err);
+                    order.has_contact = !newContactStatus;
+                    renderOrders(ordersList);
+                    alert('Ошибка обновления статуса: ' + err.message);
+                }
+            };
+
+            window.deleteOrder = async function(orderId) {
+                const confirmed = await showConfirmModal('Вы уверены, что хотите удалить этот заказ?');
+                if (!confirmed) return;
+                
+                try {
+                    await fetch(`${API_BASE}/orders/${orderId}`, { method: 'DELETE' });
+                    
+                    const index = ordersList.findIndex(o => o.id === orderId);
+                    if (index !== -1) {
+                        ordersList.splice(index, 1);
+                        renderOrders(ordersList);
+                        invalidateCache();
+                        persistOrdersLocally(ordersList);
+                    }
+                    
+                    setTimeout(() => window.location.reload(), 1000);
+                } catch (err) {
+                    console.error('Error deleting order:', err);
+                    alert('Ошибка удаления заказа: ' + err.message);
+                }
+            };
+
+            window.editOrder = function(orderId) {
+                const order = ordersList.find(o => o.id === orderId);
+                if (!order) return;
+                document.getElementById('orderNumber').value = order.order_number;
+                document.getElementById('expectedDate').value = order.expected_date;
+                document.getElementById('clientNumber').value = order.client_number;
+                document.getElementById('comments').value = order.comments || '';
+                contactStatus.value = order.has_contact ? 'true' : 'false';
+                if (order.has_contact) {
+                    contactBtn.classList.remove('bg-dark-800', 'border-dashed', 'border-dark-600', 'text-gray-400');
+                    contactBtn.classList.add('bg-green-600/20', 'border-solid', 'border-green-500', 'text-green-400');
+                    contactIcon.textContent = '✅';
+                    contactText.textContent = 'Связь с клиентом установлена';
+                } else {
+                    contactBtn.classList.add('bg-dark-800', 'border-dashed', 'border-dark-600', 'text-gray-400');
+                    contactBtn.classList.remove('bg-green-600/20', 'border-solid', 'border-green-500', 'text-green-400');
+                    contactIcon.textContent = '📞';
+                    contactText.textContent = 'Нажать, если связь была установлена';
+                }
+                currentEditingOrderId = orderId;
+                orderForm.classList.remove('hidden');
+                showOrderFormBtn.classList.add('hidden');
+                saveOrderBtn.textContent = '💾 Обновить заказ';
+            };
+
+            if (currentUser) {
+                console.log('👤 Пользователь найден в localStorage:', currentUser.username);
+                showMainApp();
+                loadOrdersOnStartup();
+            }
+
+            async function loadOrdersOnStartup() {
+                if (!currentUser) return;
+                
+                const persisted = loadPersistedOrders();
+                if (persisted) {
+                    console.log('💾 Загружено заказов из localStorage:', persisted.length);
+                    ordersList = persisted;
+                    renderOrders(persisted);
+                }
+                
+                if (!persisted) {
+                    await loadOrders(true);
+                } else {
+                    loadOrders(true).catch(err => {
+                        console.error('❌ Фоновая загрузка заказов не удалась:', err);
+                    });
+                }
+            }
+
+            loadOrdersOnStartup();
+
+            showRegisterBtn.addEventListener('click', () => {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                loginError.classList.add('hidden');
+                registerError.classList.add('hidden');
+            });
+
+            showLoginBtn.addEventListener('click', () => {
+                registerForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+                loginError.classList.add('hidden');
+                registerError.classList.add('hidden');
+            });
+
+            registerBtn.addEventListener('click', async () => {
+                const username = registerUsername.value.trim();
+                const password = registerPassword.value.trim();
+                
+                if (!username || !password) {
+                    registerError.textContent = 'Пожалуйста, заполните все поля';
+                    registerError.classList.remove('hidden');
+                    return;
+                }
+
+                registerBtn.disabled = true;
+                registerBtn.textContent = 'Регистрация...';
+
+                try {
+                    const response = await fetch(`${API_BASE}/register`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    if (!response.ok) throw new Error('Ошибка регистрации');
+                    
+                    const data = await response.json();
+                    currentUser = data;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    showMainApp();
+                } catch (err) {
+                    console.error('Ошибка регистрации:', err);
+                    registerError.textContent = err.message || 'Ошибка регистрации';
+                    registerError.classList.remove('hidden');
+                    registerBtn.disabled = false;
+                    registerBtn.textContent = 'Зарегистрироваться';
+                }
+            });
+
+            loginBtn.addEventListener('click', async () => {
+                const username = loginUsername.value.trim();
+                const password = loginPassword.value.trim();
+
+                if (!username || !password) {
+                    loginError.textContent = 'Пожалуйста, заполните все поля';
+                    loginError.classList.remove('hidden');
+                    return;
+                }
+
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Вход...';
+
+                try {
+                    const response = await fetch(`${API_BASE}/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    if (!response.ok) throw new Error('Неверный логин или пароль');
+                    
+                    const data = await response.json();
+                    currentUser = data;
+                    showMainApp();
+                    await loadOrders(true);
+                } catch (err) {
+                    loginError.textContent = err.message;
+                    loginError.classList.remove('hidden');
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Войти';
+                }
+            });
+
+            logoutBtn.addEventListener('click', () => {
+                currentUser = null;
+                localStorage.removeItem('currentUser');
+                ordersList = [];
+                cache.data = null;
+                cache.timestamp = 0;
+                mainApp.classList.add('hidden');
+                authScreens.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                loginUsername.value = '';
+                loginPassword.value = '';
+                registerUsername.value = '';
+                registerPassword.value = '';
+                registerError.classList.add('hidden');
+                loginError.classList.add('hidden');
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'Зарегистрироваться';
+            });
+
+            switchAccountBtn.addEventListener('click', () => {
+                currentUser = null;
+                localStorage.removeItem('currentUser');
+                ordersList = [];
+                cache.data = null;
+                cache.timestamp = 0;
+                mainApp.classList.add('hidden');
+                authScreens.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                loginUsername.value = '';
+                loginPassword.value = '';
+                registerUsername.value = '';
+                registerPassword.value = '';
+                registerError.classList.add('hidden');
+                loginError.classList.add('hidden');
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'Зарегистрироваться';
+            });
+
+            function showMainApp() {
+                authScreens.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+                userDisplay.textContent = '👤 ' + currentUser.username;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            }
+
+            async function loadOrders(forceRefresh = false) {
+                if (!currentUser) return;
+                
+                if (!forceRefresh) {
+                    const cached = getFromCache();
+                    if (cached) {
+                        ordersList = cached;
+                        renderOrders(cached);
+                        return;
+                    }
+                }
+
+                ordersContainer.innerHTML = '<p class="text-gray-500 text-center py-8">Загрузка заказов...</p>';
+
+                try {
+                    const response = await fetch(`${API_BASE}/orders/${currentUser.id}`);
+                    
+                    if (!response.ok) throw new Error('Ошибка загрузки заказов');
+                    
+                    const data = await response.json();
+                    
+                    ordersList = data;
+                    setCache(data);
+                    persistOrdersLocally(data);
+                    renderOrders(data);
+                } catch (err) {
+                    console.error('Ошибка загрузки заказов:', err);
+                    ordersList = [];
+                    ordersContainer.innerHTML = '<p class="text-gray-500 text-center py-8">Пока нет сохранённых заказов (ошибка загрузки)</p>';
+                }
+            }
+
+            showOrderFormBtn.addEventListener('click', () => {
+                orderForm.classList.toggle('hidden');
+                if (!orderForm.classList.contains('hidden')) {
+                    showOrderFormBtn.classList.add('hidden');
+                    resetForm();
+                    currentEditingOrderId = null;
+                    saveOrderBtn.textContent = '💾 Сохранить заказ';
+                }
+            });
+
+            contactBtn.addEventListener('click', () => {
+                const currentStatus = contactStatus.value === 'true';
+                const newStatus = !currentStatus;
+                contactStatus.value = newStatus;
+                if (newStatus) {
+                    contactBtn.classList.remove('bg-dark-800', 'border-dashed', 'border-dark-600', 'text-gray-400');
+                    contactBtn.classList.add('bg-green-600/20', 'border-solid', 'border-green-500', 'text-green-400');
+                    contactIcon.textContent = '✅';
+                    contactText.textContent = 'Связь с клиентом установлена';
+                } else {
+                    contactBtn.classList.add('bg-dark-800', 'border-dashed', 'border-dark-600', 'text-gray-400');
+                    contactBtn.classList.remove('bg-green-600/20', 'border-solid', 'border-green-500', 'text-green-400');
+                    contactIcon.textContent = '📞';
+                    contactText.textContent = 'Нажать, если связь была установлена';
+                }
+            });
+
+            function resetForm() {
+                document.getElementById('orderNumber').value = '';
+                document.getElementById('expectedDate').value = '';
+                document.getElementById('clientNumber').value = '';
+                document.getElementById('comments').value = '';
+                contactStatus.value = 'false';
+                contactBtn.classList.remove('bg-green-600/20', 'border-solid', 'border-green-500', 'text-green-400');
+                contactBtn.classList.add('bg-dark-800', 'border-dashed', 'border-dark-600', 'text-gray-400');
+                contactIcon.textContent = '📞';
+                contactText.textContent = 'Нажать, если связь была установлена';
+            }
+
+            saveOrderBtn.addEventListener('click', async () => {
+                const orderNumber = document.getElementById('orderNumber').value.trim();
+                const expectedDate = document.getElementById('expectedDate').value;
+                const clientNumber = document.getElementById('clientNumber').value.trim();
+                const comments = document.getElementById('comments').value.trim();
+                const hasContact = contactStatus.value === 'true';
+
+                if (!orderNumber || !expectedDate || !clientNumber) {
+                    alert('Пожалуйста, заполните все обязательные поля!');
+                    return;
+                }
+
+                saveOrderBtn.disabled = true;
+                saveOrderBtn.innerHTML = '<span class="animate-pulse">⏳</span> Сохранение...';
+
+                try {
+                    const order = { 
+                        userId: currentUser.id, 
+                        orderNumber, 
+                        expectedDate, 
+                        clientNumber, 
+                        hasContact, 
+                        comments 
+                    };
+
+                    if (currentEditingOrderId) {
+                        const response = await fetch(`${API_BASE}/orders/${currentEditingOrderId}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(order)
+                        });
+
+                        if (!response.ok) throw new Error('Ошибка обновления заказа');
+                        
+                        const updated = await response.json();
+                        const index = ordersList.findIndex(o => o.id === currentEditingOrderId);
+                        if (index !== -1) {
+                            ordersList[index] = updated;
+                        }
+                        renderOrders(ordersList);
+                        invalidateCache();
+                        persistOrdersLocally(ordersList);
+                        
+                        orderForm.classList.add('hidden');
+                        showOrderFormBtn.classList.remove('hidden');
+                        currentEditingOrderId = null;
+                        resetForm();
+                    } else {
+                        const response = await fetch(`${API_BASE}/orders`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(order)
+                        });
+
+                        if (!response.ok) throw new Error('Ошибка создания заказа');
+                        
+                        const newOrder = await response.json();
+                        ordersList.unshift(newOrder);
+                        renderOrders(ordersList);
+                        invalidateCache();
+                        persistOrdersLocally(ordersList);
+                        
+                        orderForm.classList.add('hidden');
+                        showOrderFormBtn.classList.remove('hidden');
+                        currentEditingOrderId = null;
+                        resetForm();
+                    }
+                } catch (err) {
+                    console.error('Ошибка при сохранении заказа:', err);
+                    alert('Ошибка сохранения заказа: ' + err.message);
+                    saveOrderBtn.textContent = currentEditingOrderId ? '💾 Обновить заказ' : '💾 Сохранить заказ';
+                    saveOrderBtn.disabled = false;
+                    return;
+                }
+
+                saveOrderBtn.innerHTML = '<span style="color: #4ade80">✅ Успешно!</span>';
+                saveOrderBtn.disabled = true;
+
+                setTimeout(() => {
+                    saveOrderBtn.textContent = currentEditingOrderId ? '💾 Обновить заказ' : '💾 Сохранить заказ';
+                    saveOrderBtn.disabled = false;
+                }, 1000);
+            });
+
+            function renderOrders(orders) {
+                ordersList = orders;
+                if (orders.length === 0) {
+                    noOrdersMessage.style.display = 'block';
+                    ordersContainer.innerHTML = '';
+                    return;
+                }
+                noOrdersMessage.style.display = 'none';
+
+                const html = orders.map(order => {
+                    const expectedDate = order.expected_date ? new Date(order.expected_date).toLocaleDateString('ru-RU') : '—';
+                    const createdAt = order.created_at ? new Date(order.created_at).toLocaleString('ru-RU') : '';
+                    const comments = order.comments ? `<div class="mt-2 p-3 bg-dark-800 rounded-lg border border-dark-600"><p class="text-sm text-gray-400 italic">"${escapeHtml(order.comments)}"</p></div>` : '';
+                    const createdBlock = createdAt ? `<div class="mt-3 pt-3 border-t border-dark-700 text-xs text-gray-600">Создан: ${createdAt}</div>` : '';
+                    const contactButton = order.has_contact
+                        ? `<button onclick="toggleOrderContact('${order.id}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">✅ Связался</button>`
+                        : `<button onclick="toggleOrderContact('${order.id}')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">❌ Не связывался</button>`;
+                    
+                    return `<div class="bg-dark-900 rounded-lg p-5 border border-dark-700 shadow-lg hover:border-blue-500/50 transition-colors">
+                        <div class="flex flex-wrap justify-between items-start gap-3 mb-3">
+                            <div>
+                                <h3 class="text-lg font-semibold text-blue-400">Заказ №${escapeHtml(order.order_number)}</h3>
+                                <p class="text-sm text-gray-500">Клиент: ${escapeHtml(order.client_number)}</p>
+                            </div>
+                            <div class="flex gap-2">${contactButton}
+                                <button onclick="editOrder('${order.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">✏️</button>
+                                <button onclick="deleteOrder('${order.id}')" class="bg-dark-700 hover:bg-red-600 text-gray-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">🗑️</button>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-400 mb-2"><span>📅 Ожидается: ${expectedDate}</span></div>
+                        ${comments}
+                        ${createdBlock}
+                    </div>`;
+                }).join('');
+
+                ordersContainer.innerHTML = html;
+            }
+
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            function showConfirmModal(message) {
+                return new Promise((resolve) => {
+                    const overlay = document.createElement('div');
+                    overlay.id = 'confirmModalOverlay';
+                    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;';
+                    
+                    const modal = document.createElement('div');
+                    modal.className = 'bg-dark-900 rounded-xl p-6 max-w-sm mx-4 border border-dark-700 shadow-2xl';
+                    modal.innerHTML = `
+                        <p class="text-gray-100 mb-6">${escapeHtml(message)}</p>
+                        <div class="flex gap-3 justify-end">
+                            <button id="confirmCancel" class="bg-dark-700 hover:bg-dark-600 text-gray-300 px-4 py-2 rounded-lg transition-colors">Отмена</button>
+                            <button id="confirmOk" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">Удалить</button>
+                        </div>
+                    `;
+                    
+                    overlay.appendChild(modal);
+                    document.body.appendChild(overlay);
+
+                    document.getElementById('confirmCancel').onclick = () => {
+                        overlay.remove();
+                        resolve(false);
+                    };
+
+                    document.getElementById('confirmOk').onclick = () => {
+                        overlay.remove();
+                        resolve(true);
+                    };
+
+                    overlay.onclick = (e) => {
+                        if (e.target === overlay) {
+                            overlay.remove();
+                            resolve(false);
+                        }
+                    };
+
+                    const handleEsc = (e) => {
+                        if (e.key === 'Escape') {
+                            overlay.remove();
+                            resolve(false);
+                            document.removeEventListener('keydown', handleEsc);
+                        }
+                    };
+                    document.addEventListener('keydown', handleEsc);
+                });
+            }
+        })();
+    </script>
+</body>
+</html>
