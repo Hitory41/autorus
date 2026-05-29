@@ -1,7 +1,7 @@
 import { neon } from '@neondatabase/serverless';
 
 export const config = {
-  runtime: 'nodejs18.x',
+  runtime: 'nodejs',
 };
 
 const sql = neon(process.env.DATABASE_URL);
